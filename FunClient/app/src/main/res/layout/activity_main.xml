@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/labeloutput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Your Random Number Is"
+        android:textSize="28sp" />
+
+    <TextView
+        android:id="@+id/output"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="1dp"
+        android:lines="2"
+        android:textSize="24sp" />
+
+    <Button
+        android:id="@+id/go_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Press To Get Number"
+        android:textSize="28sp" />
+
+    <TextView
+        android:id="@+id/imgIndex"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Enter Image Index"
+        android:textSize="28sp" />
+
+    <EditText
+        android:id="@+id/imgInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:layout_marginTop="1dp"
+        android:textSize="24sp"
+        android:inputType="numberSigned"/>
+
+
+    <ImageView
+        android:id="@+id/imageId"
+        android:layout_width="match_parent"
+        android:layout_height="275dp" />
+
+    <Button
+        android:id="@+id/send_request"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Send Image Index"
+        android:textSize="28sp" />
+</LinearLayout>
