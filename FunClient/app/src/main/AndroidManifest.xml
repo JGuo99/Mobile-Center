@@ -3,6 +3,8 @@
     package="com.example.funclient">
 
     <uses-permission android:name="FunService.Permission.ID" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
 
     <application
         android:allowBackup="true"

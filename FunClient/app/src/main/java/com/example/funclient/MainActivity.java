@@ -35,16 +35,24 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final TextView output = (TextView) findViewById(R.id.output);
+//        Request Image
+        final EditText iInput = (EditText) findViewById(R.id.imgInput);
+        final ImageView imageView = (ImageView) findViewById(R.id.imageId);
 
-        final Button goButton = (Button) findViewById(R.id.go_button);
-        goButton.setOnClickListener(new View.OnClickListener() {
-
-            public void onClick(View v) {
+        final Button iRequestButton = (Button) findViewById(R.id.send_request_img);
+        iRequestButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 try {
                     if (mBound) {
-                        String testNumber = Integer.toString(funCenterService.getPid());
-                        output.setText(testNumber);
+                        String iHolder = iInput.getText().toString();
+                        int imgIndex = Integer.parseInt(iHolder);
+                        if ((imgIndex + 1) < 1 || (imgIndex + 1) > 4) {
+                            Toast.makeText(MainActivity.this, "Please enter number from 1 to 3", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Bitmap b = funCenterService.imgIndex(imgIndex - 1); //-1 to match normal 1 - 3 count method
+                            imageView.setImageBitmap(b);
+                        }
                     } else {
                         Log.i("Client: ", "Service was not bound!");
                     }
@@ -54,19 +62,22 @@ public class MainActivity extends Activity {
             }
         });
 
-        final EditText input = (EditText) findViewById(R.id.imgInput);
-        final ImageView imageView = (ImageView) findViewById(R.id.imageId);
+//        Request Song
+        final EditText mInput = (EditText) findViewById(R.id.musicInput);
 
-        final Button requestButton = (Button) findViewById(R.id.send_request);
-        requestButton.setOnClickListener(new View.OnClickListener() {
+        final Button mRequestButton = (Button) findViewById(R.id.send_request_song);
+        mRequestButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
                     if (mBound) {
-                        String holder = input.getText().toString();
-                        int imgIndex = Integer.parseInt(holder);
-                        Bitmap b = funCenterService.imgIndex(imgIndex-1); //-1 to match normal 1 - 3 count method
-                        imageView.setImageBitmap(b);
+                        String mHolder = mInput.getText().toString();
+                        int musicIndex = Integer.parseInt(mHolder);
+                        if ((musicIndex) < 0 || (musicIndex) > 3) {
+                            Toast.makeText(MainActivity.this, "Please enter number from 1 to 3", Toast.LENGTH_SHORT).show();
+                        } else {
+                            funCenterService.musicIndex(musicIndex - 1); //-1 to match normal 1 - 3 count method
+                        }
                     } else {
                         Log.i("Client: ", "Service was not bound!");
                     }
@@ -113,11 +124,11 @@ public class MainActivity extends Activity {
             mBound = false;
         }
     };
-//    End Test
+
     @Override
     public void onResume() {
-    super.onResume();
-}
+        super.onResume();
+    }
 
     @Override
     public void onPause() {
