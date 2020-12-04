@@ -39,7 +39,7 @@
         android:id="@+id/imgInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="numberSigned"
+        android:inputType="number"
         android:textSize="18sp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -47,7 +47,7 @@
 
     <ImageView
         android:id="@+id/imageId"
-        android:layout_height="450dp"
+        android:layout_height="400dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/imgInput"

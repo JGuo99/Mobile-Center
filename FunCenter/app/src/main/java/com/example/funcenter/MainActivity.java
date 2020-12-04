@@ -15,22 +15,21 @@ import android.graphics.BitmapFactory;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.IBinder;
-import android.os.RemoteException;
 
 import androidx.core.app.NotificationCompat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Random;
 
 
 public class MainActivity extends Service {
     private static String CHANNEL_ID = "Music player style";
     private static final int NOTIFICATION_ID = 1;
     private Notification notification;
-    private MediaPlayer m;
+    private MediaPlayer m = null;
     private boolean isPlaying = false;
-
+    private int resumePosition;
+    private int startID;
 
     ArrayList<Integer> images = new ArrayList<>(
             Arrays.asList(R.drawable.cute, R.drawable.panda, R.drawable.pandroid)
@@ -40,13 +39,11 @@ public class MainActivity extends Service {
             Arrays.asList(R.raw.adventure, R.raw.epic, R.raw.evolution)
     );
 
-    private int startID;
-
     // Binder given to clients
     //    private final IBinder binder = new LocalBinder();
     private final IMediaService.Stub binder = new IMediaService.Stub() {
-        public void basicTypes(int anInt, long aLong, boolean aBoolean, float aFloat, double aDouble, String aString) throws RemoteException {
-            //Does Nothing
+        public void endService () {
+            stopSelf();
         }
 
         public Bitmap imgIndex(int index) {
@@ -57,23 +54,51 @@ public class MainActivity extends Service {
 
         public void musicIndex(int index) {
             m = MediaPlayer.create(MainActivity.this, songs.get(index));
-            Dj(m);
+            m.start();
+
+        }
+        public void play() {
+            if (!m.isPlaying()) {
+                m.seekTo(resumePosition);
+                m.start();
+            }
+        }
+
+        public void pause() {
+            if (m.isPlaying()) {
+                m.pause();
+                resumePosition = m.getCurrentPosition();
+            }
+        }
+
+        public void stop() {
+            if (m == null) {
+                return;
+            } else if (m.isPlaying()) {
+                m.stop();
+            }
         }
     };
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return binder;
+    public void onCreate() {
+        super.onCreate();
+        createNotificationChannel();
     }
 
-//    public void onCreate() {
-//        super.onCreate();
-//
-//        this.createNotificationChannel();
-//    }
-
-    public int Dj(MediaPlayer m) {
-        this.createNotificationChannel();
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Music player notification";
+            String description = "The channel for music player notifications";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
 
         final Intent notificationIntent = new Intent(getApplicationContext(), IMediaService.class);
 
@@ -101,41 +126,29 @@ public class MainActivity extends Service {
                 }
             });
         }
-
         startForeground(NOTIFICATION_ID, notification);
-
-        if (m.isPlaying()) {
-            m.seekTo(0);
-//            m.stop();
-        } else {
-            m.start();
-        }
-        return START_NOT_STICKY;
-    }
-
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "Music player notification";
-            String description = "The channel for music player notifications";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
     }
 
     @Override
+    public IBinder onBind(Intent intent) {
+        return binder;
+    }
+
+//    @Override
+//    public void onRebind(Intent intent) {
+//        super.onRebind(intent);
+//    }
+//
+//    @Override
+//    public boolean onUnbind(Intent intent) {
+//        return true;
+//    }
+
+    @Override
     public void onDestroy() {
-        if (null != m) {
+        if (m != null) {
             m.stop();
             m.release();
         }
     }
 }
-
-

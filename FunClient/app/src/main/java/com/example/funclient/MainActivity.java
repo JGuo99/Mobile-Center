@@ -26,14 +26,21 @@ import android.widget.Toast;
 import javax.crypto.KeyGenerator;
 
 public class MainActivity extends Activity {
-//Test Client
     private IMediaService funCenterService;
     boolean mBound = false;
+    private boolean isPlaying = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        final Button playButton = (Button) findViewById(R.id.play);
+        final Button pauseButton = (Button) findViewById(R.id.pause);
+        final Button stopButton = (Button) findViewById(R.id.stop);
+        playButton.setEnabled(false);
+        pauseButton.setEnabled(false);
+        stopButton.setEnabled(false);
 
 //        Request Image
         final EditText iInput = (EditText) findViewById(R.id.imgInput);
@@ -46,12 +53,17 @@ public class MainActivity extends Activity {
                 try {
                     if (mBound) {
                         String iHolder = iInput.getText().toString();
-                        int imgIndex = Integer.parseInt(iHolder);
-                        if ((imgIndex + 1) < 1 || (imgIndex + 1) > 4) {
-                            Toast.makeText(MainActivity.this, "Please enter number from 1 to 3", Toast.LENGTH_SHORT).show();
+                        int imgIndex;
+                        if (!(iHolder.equals(""))) {
+                            imgIndex = Integer.parseInt(iHolder);
+                            if ((imgIndex) < 1 || (imgIndex ) > 3) {
+                                Toast.makeText(MainActivity.this, "Please enter number from 1 to 3", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Bitmap b = funCenterService.imgIndex(imgIndex - 1); //-1 to match normal 1 - 3 count method
+                                imageView.setImageBitmap(b);
+                            }
                         } else {
-                            Bitmap b = funCenterService.imgIndex(imgIndex - 1); //-1 to match normal 1 - 3 count method
-                            imageView.setImageBitmap(b);
+                            Toast.makeText(MainActivity.this, "Please enter a number!", Toast.LENGTH_SHORT).show();
                         }
                     } else {
                         Log.i("Client: ", "Service was not bound!");
@@ -71,13 +83,77 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 try {
                     if (mBound) {
+                        int index;
                         String mHolder = mInput.getText().toString();
-                        int musicIndex = Integer.parseInt(mHolder);
-                        if ((musicIndex) < 0 || (musicIndex) > 3) {
-                            Toast.makeText(MainActivity.this, "Please enter number from 1 to 3", Toast.LENGTH_SHORT).show();
+                        if (!(mHolder.equals(""))) {
+                            index = Integer.parseInt(mHolder);
+                            if ((index) < 1 || (index) > 3) {
+                                Toast.makeText(MainActivity.this, "Please enter number from 1 to 3", Toast.LENGTH_SHORT).show();
+                            } else {
+                                //-1 to match normal 1 - 3 count method
+                                if (isPlaying != false) {
+                                    funCenterService.stop();
+                                    isPlaying = false;
+                                }
+                                funCenterService.musicIndex(index - 1); //-1 to match normal 1 - 3 count method
+                                pauseButton.setEnabled(true);
+                                stopButton.setEnabled(true);
+                                isPlaying = true;
+                            }
                         } else {
-                            funCenterService.musicIndex(musicIndex - 1); //-1 to match normal 1 - 3 count method
+                            Toast.makeText(MainActivity.this, "Please enter a number!", Toast.LENGTH_SHORT).show();
                         }
+                    } else {
+                        Log.i("Client: ", "Service was not bound!");
+                    }
+                } catch (RemoteException e) {
+                    Log.e("Client: ", e.toString());
+                }
+            }
+        });
+
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    if (mBound) {
+                        funCenterService.play();
+                        pauseButton.setEnabled(true);
+                        playButton.setEnabled(false);
+                    } else {
+                        Log.i("Client: ", "Service was not bound!");
+                    }
+                } catch (RemoteException e) {
+                    Log.e("Client: ", e.toString());
+                }
+            }
+        });
+
+        pauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    if (mBound) {
+                        funCenterService.pause();
+                        pauseButton.setEnabled(false);
+                        playButton.setEnabled(true);
+                    } else {
+                        Log.i("Client: ", "Service was not bound!");
+                    }
+                } catch (RemoteException e) {
+                    Log.e("Client: ", e.toString());
+                }
+            }
+        });
+
+        stopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    if (mBound) {
+                        funCenterService.stop();
+                        pauseButton.setEnabled(false);
+                        playButton.setEnabled(false);
                     } else {
                         Log.i("Client: ", "Service was not bound!");
                     }
@@ -88,6 +164,7 @@ public class MainActivity extends Activity {
         });
     }
 
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -97,15 +174,16 @@ public class MainActivity extends Activity {
             ResolveInfo info = getPackageManager().resolveService(intent, 0);
             intent.setComponent(new ComponentName(info.serviceInfo.packageName, info.serviceInfo.name));
             bindService(intent, this.connection, Context.BIND_AUTO_CREATE);
+//            startService(intent);
         }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (mBound) {
-            unbindService(this.connection);
-        }
+//        if (mBound) {
+//            unbindService(this.connection);
+//        }
     }
 
     /** Defines callbacks for service binding, passed to bindService() */
@@ -133,5 +211,18 @@ public class MainActivity extends Activity {
     @Override
     public void onPause() {
         super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mBound) {
+            try {
+                funCenterService.endService();
+                unbindService(this.connection);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
