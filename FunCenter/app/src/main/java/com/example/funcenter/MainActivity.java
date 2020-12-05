@@ -100,8 +100,8 @@ public class MainActivity extends Service {
             notificationManager.createNotificationChannel(channel);
         }
 
-        final Intent notificationIntent = new Intent(getApplicationContext(), IMediaService.class);
-
+//        final Intent notificationIntent = new Intent(getApplicationContext(), IMediaService.class);
+        final Intent notificationIntent = getPackageManager().getLaunchIntentForPackage("com.example.funclient");
         final PendingIntent pendingIntent = PendingIntent.getActivity(this,0, notificationIntent, 0);
 
         notification =
