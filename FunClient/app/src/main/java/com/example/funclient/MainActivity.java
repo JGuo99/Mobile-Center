@@ -90,7 +90,6 @@ public class MainActivity extends Activity {
                             if ((index) < 1 || (index) > 3) {
                                 Toast.makeText(MainActivity.this, "Please enter number from 1 to 3", Toast.LENGTH_SHORT).show();
                             } else {
-                                //-1 to match normal 1 - 3 count method
                                 if (isPlaying != false) {
                                     funCenterService.stop();
                                     isPlaying = false;
@@ -164,26 +163,25 @@ public class MainActivity extends Activity {
         });
     }
 
-
+    // Bind to Service
+    Intent serviceIntent = new Intent(IMediaService.class.getName());
     @Override
     protected void onStart() {
         super.onStart();
         if (!mBound) {
-            // Bind to Service
-            Intent intent = new Intent(IMediaService.class.getName());
-            ResolveInfo info = getPackageManager().resolveService(intent, 0);
-            intent.setComponent(new ComponentName(info.serviceInfo.packageName, info.serviceInfo.name));
-            bindService(intent, this.connection, Context.BIND_AUTO_CREATE);
-//            startService(intent);
+            ResolveInfo info = getPackageManager().resolveService(serviceIntent, 0);
+            serviceIntent.setComponent(new ComponentName(info.serviceInfo.packageName, info.serviceInfo.name));
+            bindService(serviceIntent, this.connection, Context.BIND_AUTO_CREATE);
         }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-//        if (mBound) {
-//            unbindService(this.connection);
-//        }
+        startService(serviceIntent);
+        if (mBound) {
+            unbindService(this.connection);
+        }
     }
 
     /** Defines callbacks for service binding, passed to bindService() */
@@ -206,6 +204,7 @@ public class MainActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
+        bindService(serviceIntent, this.connection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -219,7 +218,6 @@ public class MainActivity extends Activity {
         if (mBound) {
             try {
                 funCenterService.endService();
-                unbindService(this.connection);
             } catch (Exception e) {
                 e.printStackTrace();
             }

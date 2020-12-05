@@ -40,7 +40,6 @@ public class MainActivity extends Service {
     );
 
     // Binder given to clients
-    //    private final IBinder binder = new LocalBinder();
     private final IMediaService.Stub binder = new IMediaService.Stub() {
         public void endService () {
             stopSelf();
@@ -55,7 +54,6 @@ public class MainActivity extends Service {
         public void musicIndex(int index) {
             m = MediaPlayer.create(MainActivity.this, songs.get(index));
             m.start();
-
         }
         public void play() {
             if (!m.isPlaying()) {
@@ -100,7 +98,6 @@ public class MainActivity extends Service {
             notificationManager.createNotificationChannel(channel);
         }
 
-//        final Intent notificationIntent = new Intent(getApplicationContext(), IMediaService.class);
         final Intent notificationIntent = getPackageManager().getLaunchIntentForPackage("com.example.funclient");
         final PendingIntent pendingIntent = PendingIntent.getActivity(this,0, notificationIntent, 0);
 
@@ -119,7 +116,6 @@ public class MainActivity extends Service {
             m.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-
                     // stop Service if it was started with this ID
                     // Otherwise let other start commands proceed
                     stopSelf(startID);
@@ -133,16 +129,6 @@ public class MainActivity extends Service {
     public IBinder onBind(Intent intent) {
         return binder;
     }
-
-//    @Override
-//    public void onRebind(Intent intent) {
-//        super.onRebind(intent);
-//    }
-//
-//    @Override
-//    public boolean onUnbind(Intent intent) {
-//        return true;
-//    }
 
     @Override
     public void onDestroy() {
