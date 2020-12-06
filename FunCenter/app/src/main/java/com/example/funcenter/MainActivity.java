@@ -41,35 +41,35 @@ public class MainActivity extends Service {
 
     // Binder given to clients
     private final IMediaService.Stub binder = new IMediaService.Stub() {
-        public void endService () {
+        public synchronized void endService () {
             stopSelf();
         }
 
-        public Bitmap imgIndex(int index) {
+        public synchronized Bitmap imgIndex(int index) {
             Bitmap b = null;
             b = BitmapFactory.decodeResource(getResources(), images.get(index));
             return b;
         }
 
-        public void musicIndex(int index) {
+        public synchronized void musicIndex(int index) {
             m = MediaPlayer.create(MainActivity.this, songs.get(index));
             m.start();
         }
-        public void play() {
+        public synchronized void play() {
             if (!m.isPlaying()) {
                 m.seekTo(resumePosition);
                 m.start();
             }
         }
 
-        public void pause() {
+        public synchronized void pause() {
             if (m.isPlaying()) {
                 m.pause();
                 resumePosition = m.getCurrentPosition();
             }
         }
 
-        public void stop() {
+        public synchronized void stop() {
             if (m == null) {
                 return;
             } else if (m.isPlaying()) {
